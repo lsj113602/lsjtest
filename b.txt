@@ -1,1 +1,162 @@
-003������
+<#include "BasePage.ftl">
+<#macro mhead>
+	<link href="${rsRoots.rsRoot}/style/mycenter.css" rel="stylesheet" type="text/css" />
+<link  href="${rsRoots.rsRoot}/style/basic-min.css" rel="stylesheet" type="text/css" />
+<#--<link  href="${rsRoots.rsRoot}/mui/css/scroll/mui.scroll.css" rel="stylesheet" type="text/css" />
+<script src="${rsRoots.rsRoot}/mui/js/mui.min.all.js"></script>-->
+<script src="${rsRoots.rsRoot}/js/wish.js"></script>
+</#macro>
+<#macro mbody>
+<body class="bg_gray">
+<#--隐藏域的值-->
+	<#if wishOffset??>
+    <input type="hidden" id="wishOffset" value="${wishOffset}"/>
+    ////
+	</#if>
+<#--隐藏域的值结束-->
+<div class="my_collection_pop" style="position:absolute;display:none;">
+    <ul>
+        <li class="tit" id="noticetit">订阅通知</li>
+        <input type="hidden" id="selectSysNo" value=""/>
+        <input type="hidden" id="noticetype" value=""/>
+        ///////
+        <#--<li class="check">
+            <p id="reduction">
+                <input type="checkbox" name="choose" id="option1">
+                <label  onclick="reductionbtnnew()" for="option1">降价通知</label>
+            </p>
+            <p id="arrival">
+                <input type="checkbox" name="choose" id="option2">
+                <label onclick="arrivalbtnnew()" for="option2" >到货通知</label>
+            </p>
+        </li>-->
+        <li class="phone"><input type="text" id="userphone" value="" placeholder="请输入手机号"><a href="javascript:void(0);" onclick="closephone()" class="close"></a></li>
+    </ul>
+    <ol>
+        <a href="javascript:void(0);"  onclick="close_pop()"class="cancel">取消</a>
+        <a href="javascript:void(0);" id="confirmBtn" onclick="affirmnew()">确定</a>
+    </ol>
+</div>
+<div class="my_mask" style="display:none;"></div>
+<div class="wap_top_login" style="position:fixed;z-index:80;left:0;top:0;">
+    <p class="top_back" id="top_back"><a href="#" rel="nofollow"><img src="${rsRoots.rsRoot}/images/top/top_back_n.png"></a></p>
+    <#--<p class="top_word" id="showAllNotifyBtnnew"><a href="javascript:void(0);">一键订阅</a></p>-->
+    <p class="top_tit">我的收藏</p>
+</div>
+<div class="ind_content" style="margin-top:0.44rem;">
+    <div class="my_collection">
+
+	<#if wishs?? && (wishs.hasWish==true)>
+    <div id="wishdatalist">
+	<#list wishs.wishList as wish>
+
+		<#if wish.isNotifyArrivalProduct>
+			<#assign arrivalStatus=1>
+		<#else >
+			<#assign arrivalStatus=0>
+		</#if>
+		<#if wish.isNotifyLowerPrice>
+			<#assign reductionStatus=1>
+		<#else >
+			<#assign reductionStatus=0>
+		</#if>
+        <#if wish.hasInventory>
+            <#assign SysnoInventory=1>
+        <#else >
+            <#assign SysnoInventory=0>
+        </#if>
+        <#if wish.isCanDelivery>
+            <#assign SysnoCanDelivery=1>
+        <#else >
+            <#assign SysnoCanDelivery=0>
+        </#if>
+
+
+
+		<#if (wish.status!=1) || wish.hasInventory==false ||wish.isCanDelivery==false >
+        <dl class="no_sku" id="wish_dl_${wish.productySyno}">
+		<#else>
+        <dl id="wish_dl_${wish.productySyno}">
+		</#if>
+        <#--//商品降价通知是否订阅-->
+        <input type="hidden" id="reductionStatus_${wish.productySyno}" value="${reductionStatus}" />
+         <#--//商品到货通知是否订阅-->
+        <input type="hidden" id="arrivalStatus_${wish.productySyno}" value="${arrivalStatus}" />
+         <#--//商品是否有效-->
+        <input type="hidden" id="status_${wish.productySyno}" value="${wish.status}" />
+        <#--//商品是否有库存-->
+        <input type="hidden" id="hasInventory_${wish.productySyno}" value="${SysnoInventory}" />
+        <#--//商品是否能送达-->
+        <input type="hidden" id="hasCanDelivery_${wish.productySyno}" value="${SysnoCanDelivery}" />
+
+        <#if wish.email1?? && (wish.email1?length > 0)>
+            <input id="usermail_${wish.productySyno}" type="hidden" value="${wish.email1}"/>
+        <#elseif wish.email2?? && (wish.email2?length > 0)>
+            <input id="usermail_${wish.productySyno}" type="hidden" value="${wish.email2}"/>
+        <#else>
+            <input id="usermail_${wish.productySyno}" type="hidden" value="${wish.cellphone!''}"/>
+        </#if>
+        <div class="line-normal-swipex box" <#--style="margin-left:-0.7rem;"-->>
+            <a href="javascript:void(0)" onclick="addProductToCart(${wish.productySyno},0,3,addCartType.myCollect)" class="btn"></a>
+            <#--判断订阅按钮的状态-->
+        <#if (wish.status==1)>
+            <#if wish.hasInventory==false || wish.isCanDelivery==false>
+                <#if wish.isNotifyArrivalProduct>
+                    <a id="collecBtn_${wish.productySyno}" href="javascript:void(0);" onclick="notifynew(this)" class="collection" data-val="${wish.productySyno}">已订阅</a>
+                <#else>
+                    <a id="collecBtn_${wish.productySyno}" href="javascript:void(0);" onclick="notifynew(this)" class="collection" data-val="${wish.productySyno}">到货通知</a>
+                </#if>
+            <#else>
+                <#if wish.isNotifyLowerPrice>
+                    <a id="collecBtn_${wish.productySyno}" href="javascript:void(0);" onclick="notifynew(this)" class="collection" data-val="${wish.productySyno}">已订阅</a>
+                <#else>
+                    <a id="collecBtn_${wish.productySyno}" href="javascript:void(0);" onclick="notifynew(this)" class="collection" data-val="${wish.productySyno}">降价通知</a>
+                </#if>
+            </#if>
+        <#else>
+            <#if wish.isNotifyArrivalProduct>
+                <a id="collecBtn_${wish.productySyno}" href="javascript:void(0);" onclick="notifynew(this)" class="collection" data-val="${wish.productySyno}">已订阅</a>
+            <#else>
+                <a id="collecBtn_${wish.productySyno}" href="javascript:void(0);" onclick="notifynew(this)" class="collection" data-val="${wish.productySyno}">到货通知</a>
+            </#if>
+        </#if>
+            <a href="${webRoot}/${city}/product/${wish.productySyno}">
+                <dt>
+                    <#if wish.isCanDelivery==false>
+                        <em class="expect">无法送达</em>
+                    <#elseif wish.status!=1>
+                        <em class="expect">敬请期待</em>
+                    <#elseif wish.hasInventory==false>
+                        <em class="expect">已抢光</em>
+                    </#if>
+                    <img src="${wish.imageUrl}"/></dt>
+                <dd>
+                    <p class="name">${wish.productName}</p>
+                    <p class="price">¥<span>${wish.price.beforeNum}</span>${wish.price.afterNum}
+					<#if (wish.price.hasOrigPrice=="true") && (wish.price.price!=wish.price.origPrice)>
+						<font>¥${wish.price.origPrice}</font></p>
+					</#if>
+                </dd>
+            </a>
+        </div>
+        <a href="javascript:void(0)" onclick="deleteWishnew('${wish.productySyno}')" class="del">删除</a>
+        </dl>
+	</#list>
+    </div>
+
+    <#else>
+       <#-- <div class="login">
+            <div class="new_nomore" id="index_new_more" style="display:none;"><p><font style="color:#bbb;">您还没有收藏~</font></p></div>
+        </div>-->
+	</#if>
+    </div>
+    <div class="index_new_more" id="loading_more">
+        <center id="load">
+            <img src="${rsRoots.rsRoot}/images/loading.gif" style="display:block">
+        </center>
+    <#--<p><font>上拉查看更多~</font></p>-->
+    </div>
+    <div class="new_nomore" id="index_new_more" style="display:none;"><p><font style="color:#bbb;">没有更多了~</font></p></div>
+</div>
+</body>
+</#macro>
